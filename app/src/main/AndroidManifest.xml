@@ -1,0 +1,21 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <!--
+        If you build this from the official extension-template, keep that
+        template's manifest and only point its source-class entry at
+        eu.kanade.tachiyomi.extension.en.atlascomics.AtlasComics — the
+        exact meta-data key varies slightly between Mihon/Tachiyomi
+        releases, and the template for your Mihon version is authoritative.
+    -->
+    <application
+        android:allowBackup="false"
+        android:icon="@mipmap/ic_launcher"
+        android:label="ATLAS">
+        <meta-data
+            android:name="tachiyomi.extension.class"
+            android:value="eu.kanade.tachiyomi.extension.en.atlascomics.AtlasComics" />
+    </application>
+
+</manifest>
