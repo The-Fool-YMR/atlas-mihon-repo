@@ -86,7 +86,7 @@ class AtlasComics : HttpSource() {
 
     override suspend fun getPopularManga(page: Int): MangasPage {
         val response = client.newCall(GET("$baseUrl/v1/series?page=$page&limit=25", headers)).awaitSuccess()
-        val json = JSONObject(response.body.string())
+        val json = JSONObject(response.body!!.string())
         val mangas = json.getJSONArray("data").map { it.toSeries() }
         return MangasPage(mangas, json.optBoolean("has_next", false))
     }
@@ -102,7 +102,7 @@ class AtlasComics : HttpSource() {
     override suspend fun getLatestUpdates(page: Int): MangasPage {
         if (page > 1) return MangasPage(emptyList(), false)
         val response = client.newCall(GET("$baseUrl/v1/latest?limit=25&free_only=true", headers)).awaitSuccess()
-        val json = JSONObject(response.body.string())
+        val json = JSONObject(response.body!!.string())
         val mangas = json.getJSONArray("items").map { item ->
             SManga.create().apply {
                 url = item.getString("series_id")
@@ -124,7 +124,7 @@ class AtlasComics : HttpSource() {
         if (page > 1) return MangasPage(emptyList(), false)
         val encoded = query.trim().replace(" ", "%20")
         val response = client.newCall(GET("$baseUrl/v1/search?q=$encoded", headers)).awaitSuccess()
-        val json = JSONObject(response.body.string())
+        val json = JSONObject(response.body!!.string())
         val mangas = json.getJSONArray("results").map { it.toSeries() }
         return MangasPage(mangas, false)
     }
@@ -152,7 +152,7 @@ class AtlasComics : HttpSource() {
     private suspend fun fetchMangaDetails(manga: SManga): SManga {
         // SManga.url is the ATLAS series uid (see toSeries() below).
         val response = client.newCall(GET("$baseUrl/v1/series/${manga.url}?free_only=true", headers)).awaitSuccess()
-        val json = JSONObject(response.body.string())
+        val json = JSONObject(response.body!!.string())
         val titles = json.optJSONObject("titles")
         return SManga.create().apply {
             url = json.getString("uid")
@@ -188,7 +188,7 @@ class AtlasComics : HttpSource() {
 
     private suspend fun fetchChapterList(manga: SManga): List<SChapter> {
         val response = client.newCall(GET("$baseUrl/v1/series/${manga.url}/chapters?free_only=true", headers)).awaitSuccess()
-        val json = JSONObject(response.body.string())
+        val json = JSONObject(response.body!!.string())
         val chapters = mutableListOf<SChapter>()
         val groups = json.getJSONArray("groups")
         for (i in 0 until groups.length()) {
@@ -229,7 +229,7 @@ class AtlasComics : HttpSource() {
 
     override suspend fun getPageList(chapter: SChapter): List<Page> {
         val response = client.newCall(GET("$baseUrl/v1/chapters/${chapter.url}/pages", headers)).awaitSuccess()
-        val json = JSONObject(response.body.string())
+        val json = JSONObject(response.body!!.string())
         val pages = json.getJSONArray("pages")
         return (0 until pages.length()).map { i ->
             val page = pages.getJSONObject(i)
