@@ -1,0 +1,75 @@
+# Builds the ATLAS Mihon extension APK in the cloud — no Android
+# Studio or local SDK needed. Runs on every push, or manually from
+# the repo's Actions tab ("Run workflow").
+#
+# Output: the Actions run's artifact
+# "tachiyomi-en.atlascomics-v1.4.1" contains the installable APK
+# tachiyomi-en.atlascomics-v1.4.1.apk (version 1.4.1, code 1).
+#
+# Signing: the build uses the committed debug.keystore in the repo
+# root (standard public Android debug key, password "android"), so
+# every build signs with the SAME key and store updates keep working.
+# Do not switch between this and local builds: a local machine's
+# auto-generated debug key is different, and Mihon refuses updates
+# signed with a different key.
+
+name: Build ATLAS extension
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install SDK packages
+        run: |
+          yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses
+          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" \
+            "platform-tools" "platforms;android-34" "build-tools;34.0.0"
+
+      - name: Set up Gradle 8.2
+        uses: gradle/actions/setup-gradle@v3
+        with:
+          gradle-version: "8.2"
+
+      - name: Restore signing keystore
+        # The keystore is stored as base64 text (see README) because
+        # the raw file is binary; decode it back before building.
+        run: base64 --decode debug.keystore.b64 > debug.keystore
+
+      - name: Fetch app icon
+        # The launcher icon is binary, so it is not stored on this
+        # branch: reuse the golden Lambda already published on the
+        # store branch (branch "repo") of this same repository.
+        run: |
+          curl -fL -o /tmp/atlas-icon.png "https://raw.githubusercontent.com/The-Fool-YMR/atlas-mihon-repo/repo/icon/eu.kanade.tachiyomi.extension.en.atlascomics.png"
+          for d in mdpi hdpi xhdpi xxhdpi xxxhdpi; do
+            mkdir -p "app/src/main/res/mipmap-$d"
+            cp /tmp/atlas-icon.png "app/src/main/res/mipmap-$d/ic_launcher.png"
+          done
+
+      - name: Build debug APK
+        run: gradle assembleDebug --no-daemon
+
+      - name: Rename APK
+        run: cp app/build/outputs/apk/debug/app-debug.apk tachiyomi-en.atlascomics-v1.4.1.apk
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: tachiyomi-en.atlascomics-v1.4.1
+          path: tachiyomi-en.atlascomics-v1.4.1.apk
