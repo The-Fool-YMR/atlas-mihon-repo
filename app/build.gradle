@@ -26,17 +26,39 @@ android {
             // Committed debug keystore: every CI build signs with the
             // same key, so store updates keep working. This is the
             // standard public Android debug key (password "android"),
-            // not a private release key.
+            // not a private release key. Debug builds are local-only
+            // and must NEVER be published to the store: Play Protect
+            // flags the public debug key, and switching keys after
+            // an install breaks updates (signature mismatch).
             storeFile = file("../debug.keystore")
             storePassword = "android"
             keyAlias = "androiddebugkey"
             keyPassword = "android"
+        }
+        release {
+            // Private ATLAS release key (alias "atlas", PKCS#12).
+            // The keystore itself lives in GitHub Secrets
+            // (RELEASE_KEYSTORE_B64), never in the repo: the
+            // workflow decodes it to release.keystore and passes
+            // RELEASE_KEYSTORE_PASSWORD via the environment.
+            // A local release build needs the same two env vars set,
+            // or this config fails loudly instead of signing with
+            // the wrong key. The store index's signingKey MUST be
+            // this key's certificate SHA-256 fingerprint.
+            storeFile = file(System.getenv("RELEASE_KEYSTORE_FILE") ?: "release.keystore")
+            storePassword = System.getenv("RELEASE_KEYSTORE_PASSWORD")
+            keyAlias = "atlas"
+            keyPassword = System.getenv("RELEASE_KEYSTORE_PASSWORD")
+            storeType = "pkcs12"
         }
     }
 
     buildTypes {
         debug {
             signingConfig = signingConfigs.debug
+        }
+        release {
+            signingConfig = signingConfigs.release
         }
     }
 
