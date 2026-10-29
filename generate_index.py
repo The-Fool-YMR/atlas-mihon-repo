@@ -119,12 +119,14 @@ EXTENSIONS = [EXTENSION]
 #   install time against the APK's actual signing certificate, so
 #   it MUST equal that certificate's fingerprint — otherwise
 #   installs land Untrusted until manually trusted. The value
-#   below is the CI debug keystore's fingerprint (the key every
-#   CI build signs with). Before publishing, it MUST be confirmed
-#   against the built APK's certificate (keytool -printcert
-#   -jarfile <apk>); if the APK's cert fingerprint differs, fix
+#   below is the private ATLAS release key's fingerprint (the key
+#   every release build signs with, alias "atlas"). Before
+#   publishing, it MUST be confirmed against the built APK's
+#   certificate (keytool -printcert -jarfile <apk> or openssl on
+#   META-INF/CERT.RSA); if the APK's cert fingerprint differs, fix
 #   this constant and regenerate — never publish a mismatched key.
-SIGNING_KEY = "4f4c6409acc2396a3c4d58946719697c8380d8aaa2b1b1854a2954b2e2be7c77"
+#   Verified 2026-10-29 against the run #26 release artifact.
+SIGNING_KEY = "5b8ab5535d575c1e2c9af0d9a8c55adbddeb5007c13ec5404bdb30d2d29d73f1"
 REPO_TITLE = "ATLAS Mihon Extensions"
 REPO_SHORT = "ATLAS"
 REPO_URL = "https://github.com/The-Fool-YMR/atlas-mihon-repo"
