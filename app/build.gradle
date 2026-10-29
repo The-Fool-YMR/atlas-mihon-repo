@@ -5,7 +5,7 @@ plugins {
 
 android {
     namespace = "eu.kanade.tachiyomi.extension.en.atlascomics"
-    compileSdk = 34
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "eu.kanade.tachiyomi.extension.en.atlascomics"
@@ -39,12 +39,17 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
     }
+}
 
-    kotlinOptions {
-        jvmTarget = "1.8"
+// Kotlin 2.x: the android.kotlinOptions block is superseded by the
+// compilerOptions block. JVM 11 is the lowest target Kotlin 2.4
+// accepts (1.8 was removed); D8 handles it on every Android version.
+kotlin {
+    compilerOptions {
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11)
     }
 }
 
