@@ -1,6 +1,8 @@
+// AGP 9 bundles Kotlin support: the org.jetbrains.kotlin.android
+// plugin must NOT be applied (AGP 9 refuses it). Kotlin is applied
+// internally by AGP; the kotlin{} block below still configures it.
 plugins {
     id("com.android.application")
-    id("org.jetbrains.kotlin.android")
 }
 
 android {
