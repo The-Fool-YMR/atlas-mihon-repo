@@ -22,19 +22,38 @@ Keiyoushi-style repo layout (this whole folder is the published root):
 
 Usage:
     python3 generate_index.py                # uses EXTENSION below
-    python3 generate_index.py --code 2        # bump to 1.4.2 (also edit
+    python3 generate_index.py --code 2        # bump to 1.6.2 (also edit
                                               # EXTENSION["version"] to match)
 
 Rules enforced here (they are Mihon's, not ours):
-  - version must be "1.4.{code}" (the Keiyoushi convention: the patch
-    number IS the version code, so Mihon can compare updates).
+  - version is "1.6.{code}" (the tachiyomix 1.6 line: the patch
+    number IS the version code, so Mihon can compare updates; the
+    pb lib version is version minus its last component, i.e. "1.6").
   - apk filename must be tachiyomi-{lang}.{slug}-v{version}.apk.
-  - the source id is a string in the index, and it MUST equal the
-    pinned `override val id` in AtlasComics.kt — changing it orphans
-    every Mihon library that already uses ATLAS.
-  - nsfw is 0 (ATLAS is not an 18+ source).
-  - baseUrl in the index must match the extension code's baseUrl
-    (https://api.atlascomics.fun — the API, not the website).
+  - the source id is a string in the index, and it MUST equal the id
+    Mihon derives at runtime for the installed source: MD5 of
+    "name.lowercase()/lang/versionId", first 8 bytes big-endian,
+    sign bit cleared (see the library's HttpSource docs and
+    Keiyoushi's ExtensionPlugin.kt computeSourceId — verified
+    2026-10-29 against 500 real Keiyoushi index entries: 480 match
+    with versionId 1 once the name is lowercased). For ATLAS that
+    is MD5("atlas/en/1") = 6566433822980473896. Changing it
+    orphans every Mihon library that already uses ATLAS, and a
+    wrong id means Mihon never matches the installed source to
+    this entry (no updates, no store actions). NEVER use the old
+    FNV-1a package-hash id (2685846169743944013) — that was the
+    pre-1.6 scheme and cannot be produced by the extension anymore.
+  - nsfw is 0 (ATLAS is not an 18+ source). The pb does NOT carry
+    nsfw; it carries ContentWarning (field 7): nsfw 0 -> SAFE (1),
+    nsfw 1 -> NSFW (3). Writing 3 for a safe source puts the 18+
+    badge on it in Mihon (seen live 2026-10-29).
+  - baseUrl in the JSON index must match the extension code's
+    baseUrl (https://api.atlascomics.fun — the API, not the
+    website). The pb is different: its source field 4 is homeUrl,
+    the WEBSITE link Mihon opens from the extension row's globe
+    icon — that one is the site, https://atlascomics.fun. The
+    extension's real API base lives only in AtlasComics.kt, so
+    pointing homeUrl at the site cannot break chapter fetching.
 """
 
 import argparse
@@ -50,18 +69,19 @@ ROOT = Path(__file__).resolve().parent
 EXTENSION = {
     "name": "Tachiyomi: ATLAS",
     "pkg": "eu.kanade.tachiyomi.extension.en.atlascomics",
-    "apk": "tachiyomi-en.atlascomics-v1.4.1.apk",
+    "apk": "tachiyomi-en.atlascomics-v1.6.1.apk",
     "lang": "en",
     "code": 1,
-    "version": "1.4.1",
+    "version": "1.6.1",
     "nsfw": 0,
     "sources": [
         {
             "name": "ATLAS",
             "lang": "en",
-            # FNV-1a 64-bit hash of the package name; pinned in
-            # AtlasComics.kt as `override val id`. NEVER change this.
-            "id": "2685846169743944013",
+            # Mihon-derived id: MD5("atlas/en/1"), first 8 bytes
+            # big-endian, sign bit cleared. Verified 2026-10-29.
+            # NEVER change this.
+            "id": "6566433822980473896",
             "baseUrl": "https://api.atlascomics.fun",
         }
     ],
@@ -70,37 +90,52 @@ EXTENSION = {
 EXTENSIONS = [EXTENSION]
 
 # --- index.pb (Mihon 0.20+ tachiyomix format) -------------------------
-# Wire layout, reverse-engineered from the published Comix (single
-# entry) and Keiyoushi (multi entry) indexes, both gzip-compressed
-# protobuf. Field numbers, not names, are what Mihon reads:
-#   top:  1 = repo title, 2 = repo short name,
-#         3 = 64-hex repo hash (see note below),
-#         4 = links message {1 = website, 2 = discord (optional)},
+# Wire layout, CONFIRMED against Mihon's own source
+# (mihonapp/mihon, data/.../extension/model/NetworkExtensionStore.kt,
+# read 2026-10-29 — field names below are Mihon's, not guesses).
+# Field numbers, not names, are what Mihon reads:
+#   top:  1 = repo title (name), 2 = repo short name (badgeLabel),
+#         3 = signingKey (64-hex; see note below),
+#         4 = contact message {1 = website, 2 = discord (optional)},
 #         101 = entries wrapper, repeated 1 = one extension each
 #   ext:  1 = name, 2 = pkg,
-#         3 = urls message {1 = ABSOLUTE apk url, 2 = ABSOLUTE icon url},
-#         4 = lib version ("1.4" — version minus its last component),
+#         3 = resources message {1 = ABSOLUTE apk url,
+#             2 = ABSOLUTE icon url},
+#         4 = lib version ("1.6" — version minus its last component),
 #         5 = code (varint), 6 = full version string,
-#         7 = 3 (constant in every entry observed, across repos, lib
-#             versions 1.4/1.6 and nsfw 0/1 — so NOT the nsfw flag;
-#             its meaning is unconfirmed, but 3 is the observed value),
+#         7 = contentWarning enum: 0 UNSPECIFIED, 1 SAFE, 2 MIXED,
+#             3 NSFW (Mihon shows the 18+ badge for NSFW only;
+#             UNSPECIFIED also maps to SAFE in the UI, but SAFE is
+#             the correct value for a safe source),
 #         8 = repeated source messages {1 = id (int64 varint),
-#             2 = name, 3 = lang, 4 = baseUrl}
-#   NOTE on field 3: its value is repo-specific and is NOT the sha256
-#   of index.json, index.min.json, the icon, the stored gzip file, or
-#   the protobuf without field 3 (all tested against Comix). The
-#   remaining candidates are the APK hash / signing-certificate
-#   fingerprint / a repo-generated id — none computable until the
-#   APK and its signing key exist. Until then field 3 is the sha256
-#   of the protobuf encoded without field 3 (self-consistent
-#   placeholder). Mihon cannot validate it at store-add time (no
-#   APK is fetched when adding a store); worst case at install
-#   time the extension lands Untrusted until the user trusts it,
-#   which is the normal flow for third-party repos.
+#             2 = name, 3 = lang, 4 = homeUrl, 5 = mirrorUrls,
+#             7 = message} — homeUrl is the WEBSITE link, not the
+#             extension's API base (see module docstring).
+#   NOTE on field 3 (signingKey): it is the APK signing-key
+#   certificate's SHA-256 fingerprint (lowercase hex). It is NOT
+#   the sha256 of index.json, index.min.json, the icon, the stored
+#   gzip file, or the protobuf without field 3 (all tested against
+#   Comix before the schema was confirmed). Mihon checks it at
+#   install time against the APK's actual signing certificate, so
+#   it MUST equal that certificate's fingerprint — otherwise
+#   installs land Untrusted until manually trusted. The value
+#   below is the CI debug keystore's fingerprint (the key every
+#   CI build signs with). Before publishing, it MUST be confirmed
+#   against the built APK's certificate (keytool -printcert
+#   -jarfile <apk>); if the APK's cert fingerprint differs, fix
+#   this constant and regenerate — never publish a mismatched key.
+SIGNING_KEY = "4f4c6409acc2396a3c4d58946719697c8380d8aaa2b1b1854a2954b2e2be7c77"
 REPO_TITLE = "ATLAS Mihon Extensions"
 REPO_SHORT = "ATLAS"
 REPO_URL = "https://github.com/The-Fool-YMR/atlas-mihon-repo"
 RAW_BASE = "https://raw.githubusercontent.com/The-Fool-YMR/atlas-mihon-repo/repo"
+# The website Mihon opens from the extension row's globe icon
+# (pb source field 4, homeUrl). Display-only; the extension's API
+# base stays https://api.atlascomics.fun in AtlasComics.kt and in
+# the JSON index's baseUrl.
+ATLAS_SITE_URL = "https://atlascomics.fun"
+# JSON nsfw (0/1) -> pb ContentWarning enum value.
+NSFW_TO_CONTENT_WARNING = {0: 1, 1: 3}
 
 
 def _varint(n):
@@ -136,7 +171,8 @@ def _encode_source(src):
     out += _varint_field(1, int(src["id"]))
     out += _string_field(2, src["name"])
     out += _string_field(3, src["lang"])
-    out += _string_field(4, src["baseUrl"])
+    # Field 4 is homeUrl (website link), NOT the JSON baseUrl (API).
+    out += _string_field(4, ATLAS_SITE_URL)
     return bytes(out)
 
 
@@ -152,7 +188,7 @@ def _encode_ext(ext):
     out += _string_field(4, lib_version)
     out += _varint_field(5, ext["code"])
     out += _string_field(6, ext["version"])
-    out += _varint_field(7, 3)
+    out += _varint_field(7, NSFW_TO_CONTENT_WARNING[ext["nsfw"]])
     for src in ext["sources"]:
         out += _bytes_field(8, _encode_source(src))
     return bytes(out)
@@ -176,23 +212,20 @@ def _encode_top(entries, repo_hash):
 
 def write_index_pb(entries):
     import gzip
-    import hashlib
 
-    without_hash = _encode_top(entries, None)
-    repo_hash = hashlib.sha256(without_hash).hexdigest()
-    pb = _encode_top(entries, repo_hash)
+    pb = _encode_top(entries, SIGNING_KEY)
     (ROOT / "index.pb").write_bytes(gzip.compress(pb, mtime=0))
     print(f"Wrote index.pb ({len(pb)} bytes protobuf, "
-          f"repo hash {repo_hash[:12]}…)")
+          f"signingKey {SIGNING_KEY[:12]}…)")
 
 
 def validate(entries):
     for ext in entries:
         for field in ("name", "pkg", "apk", "lang", "code", "version", "nsfw", "sources"):
             assert field in ext, f"missing field {field}"
-        assert ext["version"] == f"1.4.{ext['code']}", (
+        assert ext["version"] == f"1.6.{ext['code']}", (
             f"version {ext['version']} does not match code {ext['code']} "
-            "(Keiyoushi convention: version is 1.4.<code>)"
+            "(tachiyomix 1.6 line: version is 1.6.<code>)"
         )
         slug = ext["pkg"].rsplit(".", 1)[-1]
         expected_apk = f"tachiyomi-{ext['lang']}.{slug}-v{ext['version']}.apk"
@@ -222,10 +255,10 @@ def main():
     entries = [dict(e) for e in EXTENSIONS]
     if args.code is not None:
         entries[0]["code"] = args.code
-        entries[0]["version"] = f"1.4.{args.code}"
+        entries[0]["version"] = f"1.6.{args.code}"
         entries[0]["apk"] = re.sub(
-            r"-v1\.4\.\d+\.apk$",
-            f"-v1.4.{args.code}.apk",
+            r"-v1\.6\.\d+\.apk$",
+            f"-v1.6.{args.code}.apk",
             entries[0]["apk"],
         )
     validate(entries)
