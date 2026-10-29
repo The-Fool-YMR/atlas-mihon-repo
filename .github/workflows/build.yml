@@ -6,12 +6,15 @@
 # "tachiyomi-en.atlascomics-v1.6.1" contains the installable APK
 # tachiyomi-en.atlascomics-v1.6.1.apk (version 1.6.1, code 1).
 #
-# Signing: the build uses the committed debug.keystore in the repo
-# root (standard public Android debug key, password "android"), so
-# every build signs with the SAME key and store updates keep working.
-# Do not switch between this and local builds: a local machine's
-# auto-generated debug key is different, and Mihon refuses updates
-# signed with a different key.
+# Signing: release builds sign with the PRIVATE ATLAS release key
+# (alias "atlas", PKCS#12). The keystore is a GitHub Secret
+# (RELEASE_KEYSTORE_B64) and its password is another secret
+# (RELEASE_KEYSTORE_PASSWORD) — neither is ever in the repo. The
+# earlier committed debug.keystore (public Android debug key) is
+# no longer used: Play Protect flags it, and it must never be
+# published again. Every release build signs with the SAME release
+# key, so store updates keep working; do not switch keys after
+# anyone installs, or updates fail with a signature mismatch.
 #
 # SDK: GitHub's ubuntu runners already ship an Android SDK
 # ($ANDROID_HOME with cmdline-tools). The earlier
@@ -57,10 +60,11 @@ jobs:
         with:
           gradle-version: "9.8.2"
 
-      - name: Restore signing keystore
-        # The keystore is stored as base64 text (see README) because
-        # the raw file is binary; decode it back before building.
-        run: base64 --decode debug.keystore.b64 > debug.keystore
+      - name: Restore release keystore
+        # The release keystore is a GitHub Secret, never a repo file:
+        # decode it back before building. GitHub masks secret values
+        # in logs automatically.
+        run: echo "${{ secrets.RELEASE_KEYSTORE_B64 }}" | base64 --decode > release.keystore
 
       - name: Fetch app icon
         # The launcher icon is binary, so it is not stored on this
@@ -73,11 +77,14 @@ jobs:
             cp /tmp/atlas-icon.png "app/src/main/res/mipmap-$d/ic_launcher.png"
           done
 
-      - name: Build debug APK
-        run: gradle assembleDebug --no-daemon
+      - name: Build release APK
+        env:
+          RELEASE_KEYSTORE_FILE: release.keystore
+          RELEASE_KEYSTORE_PASSWORD: ${{ secrets.RELEASE_KEYSTORE_PASSWORD }}
+        run: gradle assembleRelease --no-daemon
 
       - name: Rename APK
-        run: cp app/build/outputs/apk/debug/app-debug.apk tachiyomi-en.atlascomics-v1.6.1.apk
+        run: cp app/build/outputs/apk/release/app-release.apk tachiyomi-en.atlascomics-v1.6.1.apk
 
       - name: Upload APK
         uses: actions/upload-artifact@v5
