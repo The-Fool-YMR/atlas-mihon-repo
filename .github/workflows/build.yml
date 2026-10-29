@@ -62,9 +62,12 @@ jobs:
 
       - name: Restore release keystore
         # The release keystore is a GitHub Secret, never a repo file:
-        # decode it back before building. GitHub masks secret values
-        # in logs automatically.
-        run: echo "${{ secrets.RELEASE_KEYSTORE_B64 }}" | base64 --decode > release.keystore
+        # decode it into the app module dir. The signing config's
+        # file("release.keystore") resolves relative to app/, NOT
+        # the repo root — decoding to the root was run #25's
+        # failure (validateSigningRelease: keystore not found).
+        # GitHub masks secret values in logs automatically.
+        run: echo "${{ secrets.RELEASE_KEYSTORE_B64 }}" | base64 --decode > app/release.keystore
 
       - name: Fetch app icon
         # The launcher icon is binary, so it is not stored on this
