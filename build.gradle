@@ -1,5 +1,7 @@
-// Root build file: plugin versions only (kept in step with Gradle 8.2 + JDK 17).
+// Root build file: plugin versions only (kept in step with Gradle 9.8.2 + JDK 17).
+// Versions mirror keiyoushi/extensions-source: the extensions-lib stubs
+// are built with Kotlin 2.4 metadata, which Kotlin 1.9 cannot read.
 plugins {
-    id("com.android.application") version "8.2.2" apply false
-    id("org.jetbrains.kotlin.android") version "1.9.22" apply false
+    id("com.android.application") version "9.4.1" apply false
+    id("org.jetbrains.kotlin.android") version "2.4.10" apply false
 }
