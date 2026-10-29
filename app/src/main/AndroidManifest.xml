@@ -16,6 +16,10 @@
         <meta-data
             android:name="tachiyomi.extension.class"
             android:value="eu.kanade.tachiyomi.extension.en.atlascomics.AtlasComics" />
+        <!-- Pins the tachiyomix API generation (1.6 suspend API). -->
+        <meta-data
+            android:name="tachiyomix.extensionLib"
+            android:value="1.6" />
     </application>
 
 </manifest>
