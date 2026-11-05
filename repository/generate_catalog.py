@@ -71,7 +71,7 @@ def generate(args):
     )
     index = index_pb2.Index(
         name=args.name,
-        badgeLabel="ATLAS",
+        badgeLabel=args.badge_label,
         signingKey=fingerprint,
         contact=index_pb2.Contact(website=args.contact),
         extensionList=index_pb2.ExtensionList(extensions=[extension]),
@@ -117,7 +117,8 @@ if __name__ == "__main__":
         parser.add_argument(f"--{field}", type=Path, required=True)
     parser.add_argument("--jar", type=Path)
     parser.add_argument("--public-base-url", required=True)
-    parser.add_argument("--name", default="Atlas Comics Extensions")
+    parser.add_argument("--name", default="thefool")
+    parser.add_argument("--badge-label", default="thefool")
     parser.add_argument("--website", default="https://atlascomics.dpdns.org")
     parser.add_argument("--contact", default="https://github.com/The-Fool-YMR/atlas-mihon-repo")
     generate(parser.parse_args())
