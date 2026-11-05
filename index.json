@@ -1,19 +1,33 @@
-[
-  {
-    "name": "Tachiyomi: ATLAS",
-    "pkg": "eu.kanade.tachiyomi.extension.en.atlascomics",
-    "apk": "tachiyomi-en.atlascomics-v1.6.1.apk",
-    "lang": "en",
-    "code": 1,
-    "version": "1.6.1",
-    "nsfw": 0,
-    "sources": [
+{
+  "name": "Atlas Comics Extensions",
+  "badgeLabel": "ATLAS",
+  "signingKey": "77c351a8600ed5b9fcc965a9dc18c3fd4a96776f0365a9abece4e710ddc2fad9",
+  "contact": {
+    "website": "https://github.com/The-Fool-YMR/atlas-mihon-repo"
+  },
+  "extensionList": {
+    "extensions": [
       {
-        "name": "ATLAS",
-        "lang": "en",
-        "id": "6566433822980473896",
-        "baseUrl": "https://api.atlascomics.fun"
+        "name": "Atlas Comics",
+        "packageName": "eu.kanade.tachiyomi.extension.en.atlascomics",
+        "resources": {
+          "apkUrl": "https://raw.githubusercontent.com/The-Fool-YMR/atlas-mihon-repo/repo/apk/atlas-comics-v1.6.1.apk",
+          "iconUrl": "https://raw.githubusercontent.com/The-Fool-YMR/atlas-mihon-repo/repo/icon/eu.kanade.tachiyomi.extension.en.atlascomics.png",
+          "jarUrl": "https://raw.githubusercontent.com/The-Fool-YMR/atlas-mihon-repo/repo/jar/tachiyomi-en.atlascomics-v1.6.1.jar"
+        },
+        "extensionLib": "1.6",
+        "versionCode": "106001",
+        "versionName": "1.6.1",
+        "contentWarning": "CONTENT_WARNING_MIXED",
+        "sources": [
+          {
+            "id": "1339342772188044529",
+            "name": "Atlas Comics",
+            "language": "en",
+            "homeUrl": "https://atlascomics.dpdns.org"
+          }
+        ]
       }
     ]
   }
-]
+}
