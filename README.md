@@ -36,7 +36,7 @@ Requires Git, JDK 21+, and Android SDK platform **37.0** with build-tools **36.0
 
 The script downloads a sparse checkout of Keiyoushi pinned to commit `4591fbc9bb571ad03aaea0f7428f7f403350e90e`, copies the extension module into it, formats the Kotlin source, builds the release APK, runs unit tests and release lint, and copies the result to `dist/`. Portable tools already present in `.tools/jdk` and `.tools/android-sdk` are detected automatically.
 
-The GitHub Actions workflow builds and uploads the APK when this project is pushed to your own repository. No publishing or external repository changes are performed by the local build script.
+Build and test the APK manually with `build.ps1`. No publishing or external repository changes are performed by the local build script.
 
 ## Regenerate the GitHub catalog
 
