@@ -1,0 +1,8 @@
+/.tools/
+/keiyoushi/
+/dist/
+/atlas-*.json
+/atlas-*.html
+/atlas-icon.png
+/.gradle/
+/local.properties

@@ -1,0 +1,38 @@
+name: Build Atlas Comics extension
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'src/**'
+      - 'tests/**'
+      - 'build.ps1'
+      - '.github/workflows/build.yml'
+      - 'repository/**'
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  apk:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: android-actions/setup-android@v3
+      - name: Install Android SDK
+        shell: pwsh
+        run: sdkmanager 'platforms;android-37.0' 'build-tools;36.0.0'
+      - name: Compile, test, and lint
+        shell: pwsh
+        run: ./build.ps1
+      - uses: actions/upload-artifact@v4
+        with:
+          name: atlas-comics-extension
+          path: dist/*.apk
+          if-no-files-found: error
