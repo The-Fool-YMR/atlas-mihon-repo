@@ -1,4 +1,4 @@
-# Atlas Comics for Mihon
+# thefool — Atlas Comics for Mihon
 
 An English Mihon source extension for [Atlas Comics](https://atlascomics.dpdns.org), using its [public API](https://api.atlascomics.dpdns.org/docs) and the [Keiyoushi extension framework](https://github.com/keiyoushi/extensions-source).
 
@@ -20,7 +20,7 @@ Add this URL in Mihon's extension stores/repositories:
 https://github.com/The-Fool-YMR/atlas-mihon-repo/raw/repo/index.pb
 ```
 
-Refresh the extension list, then install **Atlas Comics**. The catalog is hosted on this GitHub repository's `repo` branch; buildable source lives on `main`.
+The store appears as **thefool**. Refresh the extension list, then install **Atlas Comics**. The catalog is hosted on this GitHub repository's `repo` branch; buildable source lives on `main`.
 
 Transfer `dist/atlas-comics-v1.6.1.apk` to your Android device and install it. In Mihon, open **Browse → Extensions**, locate **Atlas Comics**, and trust the extension if prompted. Then open **Browse → Sources → English → Atlas Comics**.
 
