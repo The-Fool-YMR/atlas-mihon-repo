@@ -24,7 +24,7 @@ Refresh the extension list, then install **Atlas Comics**. The catalog is hosted
 
 Transfer `dist/atlas-comics-v1.6.1.apk` to your Android device and install it. In Mihon, open **Browse → Extensions**, locate **Atlas Comics**, and trust the extension if prompted. Then open **Browse → Sources → English → Atlas Comics**.
 
-This project publishes its own catalog. Builds use Android's development signing key unless you supply your own signing configuration; retain the same key for future updates. The catalog's fingerprint is extracted from the actual signed APK. If you installed the older **ATLAS** build previously hosted here, export your library backup and migrate to **Atlas Comics**; the old build used a different signing key and source ID. The APK built in this chat remains compatible with the new catalog.
+This repository hosts the newly built Atlas Comics extension. Builds use Android's development signing key unless you supply your own signing configuration; retain the same key for future updates. The catalog's fingerprint is extracted from the actual signed APK.
 
 ## Build on Windows
 

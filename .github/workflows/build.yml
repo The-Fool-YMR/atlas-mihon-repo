@@ -3,7 +3,7 @@ name: Build Atlas Comics extension
 on:
   workflow_dispatch:
   push:
-    branches: [main, source]
+    branches: [main]
     paths:
       - 'src/**'
       - 'tests/**'
