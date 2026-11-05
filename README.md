@@ -1,55 +1,82 @@
-# thefool — Atlas Comics for Mihon
+# thefool — Mihon Extension Store
 
-An English Mihon source extension for [Atlas Comics](https://atlascomics.dpdns.org), using its [public API](https://api.atlascomics.dpdns.org/docs) and the [Keiyoushi extension framework](https://github.com/keiyoushi/extensions-source).
+Read **Atlas Comics** in [Mihon](https://mihon.app/).
 
-## Features
+| What you see in Mihon | Name |
+| --- | --- |
+| Extension store / publisher | **thefool** |
+| Extension and reading source | **Atlas Comics** |
+| Chapter language | English |
 
-- Trending catalog, all titles, recently added, recently completed, and most followed browsing.
-- Latest updates, deduplicated by series. Atlas exposes up to 100 latest entries without pagination.
-- Title search and filters for type, status, demographic, content rating, genres, themes, tags, author, artist, publisher, and year. Search results are paginated locally because Atlas's search endpoint has no page parameter.
-- Series descriptions, covers, authors, artists, genres, status, and alternative titles.
-- English, unlocked chapters from every available source, labeled using Mihon's scanlator field. Different sources retain distinct chapter URLs.
-- Decimal chapters, descending chapter order, upload dates, and page images in numeric order.
-- Atlas website and API series links accepted in URL search. Images use the website Referer required by Atlas's proxy.
+## Add the store
 
-## Install
-
-Add this URL in Mihon's extension stores/repositories:
+1. Open **Mihon → More → Settings → Browse → Extension stores**.
+2. Tap **Add** or **+**.
+3. Paste the complete URL below and confirm.
 
 ```text
-https://github.com/The-Fool-YMR/atlas-mihon-repo/raw/repo/index.pb
+https://raw.githubusercontent.com/The-Fool-YMR/atlas-mihon-repo/repo/index.pb
 ```
 
-The store appears as **thefool**. Refresh the extension list, then install **Atlas Comics**. The catalog is hosted on this GitHub repository's `repo` branch; buildable source lives on `main`.
+[Open the repository index](https://raw.githubusercontent.com/The-Fool-YMR/atlas-mihon-repo/repo/index.pb)
 
-Transfer `dist/atlas-comics-v1.6.1.apk` to your Android device and install it. In Mihon, open **Browse → Extensions**, locate **Atlas Comics**, and trust the extension if prompted. Then open **Browse → Sources → English → Atlas Comics**.
+The store should appear as **thefool**.
 
-This repository hosts the newly built Atlas Comics extension. Builds use Android's development signing key unless you supply your own signing configuration; retain the same key for future updates. The catalog's fingerprint is extracted from the actual signed APK.
+## Install Atlas Comics
 
-## Build on Windows
+1. Go to **Browse → Extensions**.
+2. Refresh the list and search for **Atlas Comics**.
+3. Tap **Install** and complete any installation prompts.
+4. If Mihon marks the extension as untrusted, select **Trust** for the Atlas Comics extension from this store.
+5. Open **Browse → Sources → English → Atlas Comics**.
 
-Requires Git, JDK 21+, and Android SDK platform **37.0** with build-tools **36.0.0** (the pinned framework's default). Set `JAVA_HOME` and `ANDROID_HOME`, then run:
+Use a Mihon version that supports **extension API 1.6**. If Mihon reports an unsupported extension version, update Mihon using its [official website](https://mihon.app/).
 
-```powershell
-.\build.ps1
-```
+## Find and read a series
 
-The script downloads a sparse checkout of Keiyoushi pinned to commit `4591fbc9bb571ad03aaea0f7428f7f403350e90e`, copies the extension module into it, formats the Kotlin source, builds the release APK, runs unit tests and release lint, and copies the result to `dist/`. Portable tools already present in `.tools/jdk` and `.tools/android-sdk` are detected automatically.
+- Open Atlas Comics to browse trending titles.
+- Use **Latest** to see recent chapter updates.
+- Search by title, or open the filters to browse all titles, recently added, recently completed, or most followed series.
+- Filter by type, status, demographic, content rating, genres, themes, tags, author, artist, publisher, or year.
+- Open a series, add it to your library, and choose a chapter to start reading.
 
-Build and test the APK manually with `build.ps1`. No publishing or external repository changes are performed by the local build script.
+A series can have chapter versions from several sources. The chapter's scanlator label identifies its source, so multiple versions of the same chapter number are expected.
 
-## Regenerate the GitHub catalog
+The extension lists English, unlocked chapters provided by Atlas Comics. Chapter and image availability depends on Atlas Comics and its upstream sources.
 
-Install `repository/requirements.txt` in a Python virtual environment. Run `repository/generate_catalog.py --help` for its build metadata, APK, optional JAR, icon, Android tools, output directory, and public base URL arguments. The generator verifies the APK signature and package/version against the build metadata before writing gzip-compressed `index.pb`, JSON indexes, `repo.json`, download files, and checksums. Publish the generated directory's contents to the `repo` branch. Keep the signing key unchanged when publishing updates.
+## Updates
 
-## Source and checks
+When a new extension version is published, refresh **Browse → Extensions** and install the available update. Keep the **thefool** store added to receive its extension listings.
 
-The extension module lives in `src/en/atlascomics`. Its `build.gradle.kts` uses the current `KeiSource` API (`libVersion = "1.6"`) with generated source registration. It can also be copied into the pinned Keiyoushi checkout directly.
+To check for new chapters in a series, refresh that series in Mihon or use Mihon's library update feature.
 
-`tests/fixtures` contains public API responses captured on November 5, 2026. Unit tests cover response parsing, stable series identifiers, multiple source versions, chapter sorting, locked/language filtering, decimal chapters, dates, and numeric page order. Test-only in-memory manga and chapter models supply the host factories that the extension SDK deliberately leaves as throwing stubs. These doubles are outside the production source set and are not packaged in the APK. These checks do not replace testing the installed APK on a device running Mihon.
+## Manual APK download
 
-The API and image servers must remain reachable. Locked chapters are omitted; this extension does not implement Atlas account login or purchases.
+If you need to install the current APK directly:
 
-## License
+[**Download Atlas Comics v1.6.1**](https://raw.githubusercontent.com/The-Fool-YMR/atlas-mihon-repo/repo/apk/atlas-comics-v1.6.1.apk)
 
-Extension code is licensed under Apache-2.0; see `LICENSE`. The app icon is supplied by Atlas Comics and remains the property of its owner. Keiyoushi's downloaded framework retains its own license and attribution.
+Open the downloaded APK on your Android device and complete installation. If Android asks, allow installation from the app you used to open it. Then return to Mihon's Extensions tab and trust the extension if prompted.
+
+Use the file from this link, rather than a previously downloaded copy of the old ATLAS extension.
+
+## Troubleshooting
+
+| Problem | What to try |
+| --- | --- |
+| Adding the store shows HTTP 404 | Copy the full `raw.githubusercontent.com` URL from **Add the store** above. |
+| The store still says “Atlas Comics Extensions” | Open **Extension stores**, tap **Refresh**, then restart Mihon. If needed, remove and re-add the store using the URL above. |
+| Atlas Comics does not appear | Refresh Extensions and check the English-language and content-rating filters. This extension is marked **Mixed**. |
+| Download or installation fails | Retry with the current APK link above. If the old ATLAS extension is still installed and Android reports a package/signature conflict, back up your Mihon library before removing the old extension and installing the new one. |
+| Chapters or images fail to load | Check your connection and whether the same series opens on the [Atlas Comics website](https://atlascomics.dpdns.org). Retry when the source is available. |
+
+If a problem continues, [report it on GitHub](https://github.com/The-Fool-YMR/atlas-mihon-repo/issues). Include your Mihon version, Android version, the exact error, and the affected series/chapter if relevant.
+
+## Links and credits
+
+- [Atlas Comics website](https://atlascomics.dpdns.org)
+- [Mihon](https://mihon.app/)
+- [Extension source code](https://github.com/The-Fool-YMR/atlas-mihon-repo/tree/main/src/en/atlascomics)
+- [Developer and build guide](https://github.com/The-Fool-YMR/atlas-mihon-repo/blob/main/DEVELOPMENT.md)
+
+Extension code is licensed under [Apache-2.0](https://github.com/The-Fool-YMR/atlas-mihon-repo/blob/main/LICENSE). The extension uses the [Keiyoushi build framework](https://github.com/keiyoushi/extensions-source). The Atlas Comics icon belongs to its owner.
