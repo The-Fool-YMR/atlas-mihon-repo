@@ -58,10 +58,12 @@ try {
     Copy-Item -LiteralPath (Join-Path $module 'build.gradle.kts') -Destination (Join-Path $root 'src/en/atlascomics/build.gradle.kts') -Force
     $dist = Join-Path $root 'dist'
     New-Item -ItemType Directory -Force $dist | Out-Null
-    $apk = Get-ChildItem (Join-Path $module 'build/outputs/apk/release') -Filter *.apk | Select-Object -First 1
-    if (-not $apk) { throw 'Build completed without producing an APK.' }
-    Copy-Item -LiteralPath $apk.FullName -Destination (Join-Path $dist 'atlas-comics-v1.6.1.apk') -Force
-    Get-FileHash (Join-Path $dist 'atlas-comics-v1.6.1.apk') -Algorithm SHA256
+    $releaseDir = Join-Path $module 'build/outputs/apk/release'
+    $output = (Get-Content (Join-Path $releaseDir 'output-metadata.json') -Raw | ConvertFrom-Json).elements
+    if ($output.Count -ne 1) { throw 'Expected one release APK.' }
+    $publishedApk = Join-Path $dist "atlas-comics-v$($output.versionName).apk"
+    Copy-Item -LiteralPath (Join-Path $releaseDir $output.outputFile) -Destination $publishedApk -Force
+    Get-FileHash $publishedApk -Algorithm SHA256
 } finally {
     Pop-Location
 }

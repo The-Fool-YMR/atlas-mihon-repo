@@ -1,5 +1,7 @@
 package eu.kanade.tachiyomi.source.model
 
+import kotlinx.serialization.json.JsonObject
+
 // The extension SDK's factories throw "Stub!" outside Mihon. These test-only
 // models supply the host factories while exercising the real DTO mapping code.
 interface SManga {
@@ -38,6 +40,7 @@ interface SChapter {
     var chapter_number: Float
     var scanlator: String?
     var date_upload: Long
+    var memo: JsonObject
 
     companion object {
         fun create(): SChapter = object : SChapter {
@@ -46,6 +49,7 @@ interface SChapter {
             override var chapter_number = -1f
             override var scanlator: String? = null
             override var date_upload = 0L
+            override var memo = JsonObject(emptyMap())
         }
     }
 }

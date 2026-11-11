@@ -3,8 +3,13 @@ package eu.kanade.tachiyomi.extension.en.atlascomics
 import eu.kanade.tachiyomi.source.model.SManga
 import keiyoushi.utils.parseAs
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonPrimitive
+import okhttp3.HttpUrl.Companion.toHttpUrl
+import okhttp3.Request
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
+import org.junit.Assert.assertThrows
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.BeforeClass
@@ -64,6 +69,36 @@ class AtlasComicsTest {
         assertEquals(10.5f, chapters.single().chapter_number, 0f)
         assertEquals("Chapter 10.5", chapters.single().name)
         assertTrue(chapters.single().date_upload > 0)
+
+        val withLocked = json.parseAs<ChapterResponse>().toChapters(showLocked = true)
+        assertEquals(listOf(11f, 10.5f), withLocked.map { it.chapter_number })
+        assertEquals("/v1/series/a/chapter-11-b", withLocked.first().url)
+        assertEquals("🔒 Paid", withLocked.first().name)
+        assertEquals(JsonPrimitive(true), withLocked.first().memo["atlas_locked"])
+        assertNull(withLocked.last().memo["atlas_locked"])
+    }
+
+    @Test
+    fun keyIsRestrictedToTheSelectedSecureApiOrigin() {
+        val server = "https://atlas.example:8443".toHttpUrl()
+        val original = Request.Builder().url("$server" + "v1/search").build()
+        val authenticated = original.withAtlasKey(server, "test-key")
+        assertEquals("test-key", authenticated.header("X-API-Key"))
+        assertNull(authenticated.withAtlasKey(server, "").header("X-API-Key"))
+        for (url in listOf(
+            "http://atlas.example:8443/v1/search",
+            "https://atlas.example/v1/search",
+            "https://other.example:8443/v1/search",
+            "https://atlas.example:8443/cover/image.png",
+        )) {
+            assertNull(authenticated.newBuilder().url(url).build().withAtlasKey(server, "test-key").header("X-API-Key"))
+        }
+    }
+
+    @Test
+    fun aLockedPagesResponseCannotBeRead() {
+        val response = """{"is_locked":true,"pages":[]}""".parseAs<PagesResponse>()
+        assertThrows(IllegalStateException::class.java) { response.toPages() }
     }
 
     @Test
