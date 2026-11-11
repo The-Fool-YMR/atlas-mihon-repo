@@ -7,6 +7,8 @@ import keiyoushi.utils.MarkdownDescription
 import keiyoushi.utils.tryParse
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.buildJsonObject
 import kotlin.time.Instant
 
 @Serializable
@@ -96,8 +98,8 @@ class Cover(val url: String? = null, @SerialName("thumb_url") val thumbUrl: Stri
 
 @Serializable
 class ChapterResponse(private val groups: List<ChapterGroup>) {
-    fun toChapters(): List<SChapter> = groups.flatMap { it.sources }
-        .filter { !it.isLocked && (it.language == null || it.language == "en") }
+    fun toChapters(showLocked: Boolean = false): List<SChapter> = groups.flatMap { it.sources }
+        .filter { (showLocked || !it.isLocked) && (it.language == null || it.language == "en") }
         .map { it.toSChapter() }
         .distinctBy { it.url }
         .sortedByDescending { it.chapter_number }
@@ -122,6 +124,10 @@ class Chapter(
         url = chapterUrl
         chapter_number = chapterNumber.toFloatOrNull() ?: -1f
         name = title?.takeIf { it.isNotBlank() } ?: "Chapter ${chapterNumber.removeSuffix(".0")}"
+        if (isLocked) {
+            name = "🔒 $name"
+            memo = buildJsonObject { put("atlas_locked", JsonPrimitive(true)) }
+        }
         scanlator = listOfNotNull(sourceName, scanlatorGroup?.takeIf { it.isNotBlank() }).distinct().joinToString(" / ")
         date_upload = Instant.tryParse(freedAt ?: updatedAt)
     }
@@ -129,7 +135,13 @@ class Chapter(
 
 @Serializable
 class PagesResponse(private val pages: List<ChapterPage>) {
-    fun toPages(): List<Page> = pages.sortedBy { it.index }.map { Page(it.index, imageUrl = it.url) }
+    @SerialName("is_locked")
+    private val isLocked: Boolean = false
+
+    fun toPages(): List<Page> {
+        if (isLocked) error("This chapter is locked on Atlas.")
+        return pages.sortedBy { it.index }.map { Page(it.index, imageUrl = it.url) }
+    }
 }
 
 @Serializable
