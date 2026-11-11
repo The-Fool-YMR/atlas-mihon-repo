@@ -1,10 +1,10 @@
 {
-  "apk/atlas-comics-v1.6.1.apk": "c5b7f1d5c40a085fe03d9bb2b79c27d14995a45271fb87504aa7b957d0c8e2bf",
+  "apk/atlas-comics-v1.6.2.apk": "8b0cfa43cd562ea6946df2d0b159f0c45fe365780389ec135a7b753e2c33f378",
   "icon/eu.kanade.tachiyomi.extension.en.atlascomics.png": "2326297dce9681f8f8727d80da9b9e000cacde2a7086b9e30397f484ad6970a2",
-  "index.html": "3a00f15e7a3502f3a7c8903d7a9298883bd15cd631eee759d64812c391d5cf65",
-  "index.json": "4d78aeedacd8c371b6007dde6360c87646d2817d72031f737570cecf86c27eae",
-  "index.min.json": "cae842559436e4084b98309d64afa01c04b0b741c627d4f353097c5fc5531698",
-  "index.pb": "8f184b09d7611da5d3ce64bd0498800c5ec50db152bd64f351005fdb29092794",
-  "jar/tachiyomi-en.atlascomics-v1.6.1.jar": "47a0c93476eb276b54f4d393623d759341d7742e96adb002edace4f39e63f765",
+  "index.html": "c9924078aa537822003e60edd2e73aeba399eab823b33b5283d0b6694315f717",
+  "index.json": "dbaf926b22b7e0af978a02ddf1e5672c8e932ee69d65eb90d9d4af3ef95a67ad",
+  "index.min.json": "9f3ca0b8a820b4fc6db288bcb5c4bc7cf03e502876f83e6915db0485ff768bdc",
+  "index.pb": "1d89c88448b759ad68daf860b29d9d0fcf446c2961a6a130a4a5962b05deff6f",
+  "jar/tachiyomi-en.atlascomics-v1.6.2.jar": "3cc9464e0e23a35c9cad791699f588c9416ff7ce6f7c8553df94b28488da4648",
   "repo.json": "e1c3ea5c11ff3a006e3472899030f9fb4c18ac1b9cb4ca11c1b52a3a1a4507e4"
 }
