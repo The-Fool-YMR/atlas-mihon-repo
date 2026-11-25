@@ -96,7 +96,7 @@ abstract class AtlasComics :
 
     override suspend fun getLatestUpdates(page: Int): MangasPage {
         if (page > 1) return MangasPage(emptyList(), false)
-        val result = client.get("$baseUrl/v1/latest?limit=100&free_only=true", Fetch.XHR)
+        val result = client.get("$baseUrl/v1/series/latest?limit=100&free_only=true", Fetch.XHR)
             .parseAs<LatestResponse>()
         return MangasPage(result.items.distinctBy { it.seriesId }.map { it.toSManga() }, false)
     }

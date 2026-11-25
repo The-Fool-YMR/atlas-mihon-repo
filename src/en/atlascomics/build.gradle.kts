@@ -28,7 +28,7 @@ tasks.matching { it.name.startsWith("ksp") && it.name.contains("UnitTest") }.con
 
 keiyoushi {
     name = "Atlas Comics"
-    versionCode = 2
+    versionCode = 3
     contentWarning = ContentWarning.MIXED
     libVersion = "1.6"
 
